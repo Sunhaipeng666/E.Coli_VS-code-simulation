@@ -54,8 +54,6 @@ model parameters (e.g. transcription probabilities). These parameters are used t
 
 **1. 在 Windows 11 上安装 Windows Subsystem for Linux (WSL)**
 
-由于您使用的是 Windows 11 专业版，安装过程非常简单。
-
 以管理员身份打开 PowerShell 或 Windows Terminal：
 
 点击“开始”按钮，输入 Terminal 或 PowerShell。
