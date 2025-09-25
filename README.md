@@ -252,9 +252,10 @@ Bash
 
 
 
-git clone https://github.com/CovertLab/vEcoli.git
+git clone (https://github.com/Sunhaipeng666/E.Coli_VS-code-simulation.git)
 
-cd vEcoli3. 运行 Vivarium E. coli 仓库
+cd vEcoli
+3. 运行 Vivarium E. coli 仓库
 
 进入仓库文件夹后，请按照 README.md 文档的指示，使用 uv 来设置环境和运行 Nextflow 工作流。
 
