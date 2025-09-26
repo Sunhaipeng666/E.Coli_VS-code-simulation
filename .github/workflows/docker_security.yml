@@ -9,9 +9,9 @@ permissions:
 on:
   push:
     branches:
-      - master
+      - main,master
   pull_request:
-    branches: [master]
+    branches: [main,master]
   schedule:
     - cron: "0 0 * * *" # Runs daily at midnight UTC
 
@@ -38,7 +38,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Analyze for critical and high CVEs
@@ -55,3 +55,35 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: sarif.output.json
+
+  # =====================
+  # 常见问题与解答（Q&A）
+  # =====================
+  # Q1: docker hub仓库变量和密钥在哪里设置？
+  # A1: 在 GitHub 仓库 Settings → Variables（变量）和 Settings → Secrets（密钥）中设置。
+  #
+  # Q2: 我能看到别人的仓库变量和密钥吗？
+  # A2: 不能，只有有权限的协作者或管理员能管理，密钥内容无法查看明文。
+  #
+  # Q3: 必须登录 Docker Hub 才能执行安全检查吗？
+  # A3: 不必须。安全检查针对本地构建的镜像即可，登录主要用于推送镜像到 Docker Hub。
+  #
+  # Q4: 执行的脚本在哪里？
+  # A4: 所有流程都在 workflow 文件 steps 里定义，实际由云端 GitHub Actions 执行，无需本地脚本。
+  #
+  # Q5: docker/build-push-action@v6 指向哪里？
+  # A5: 这是 Docker 官方在 GitHub Marketplace 提供的 Action，不在本地仓库。详见 https://github.com/docker/build-push-action
+  #
+  # Q6: 这个工作流会自动同步本地和云端吗？
+  # A6: 不会。你需要手动 push 本地更改到远程仓库，自动化流程只在云端执行，不会同步回本地。
+  #
+  # Q7: 云端执行的好处是什么？
+  # A7: 自动化、高效、一致、可靠，团队协作方便，无需本地环境支持。
+  #
+  # Q8: 安全检测和合规的作用？
+  # A8: 及时发现漏洞、降低风险、满足合规、提升效率、增强协作。
+  #
+  #Q9: 在哪里看漏洞扫描结果
+  #A9:你可以在 GitHub 仓库页面的 “Security” → “Code scanning alerts” 查看漏洞扫描结果。
+  #另外，每次 workflow 运行结束后，在 “Actions” 页面点击对应的 workflow 运行记录，也能看到详细的扫描日志和结果。
+  #如果配置了 SARIF 报告上传，所有检测到的漏洞会自动汇总在 “Code scanning alerts” 页面，便于追踪和管理。

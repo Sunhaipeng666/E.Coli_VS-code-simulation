@@ -6,9 +6,9 @@ permissions:
 
 on:
   push:
-    branches: [master]
+    branches: [main, master]
   pull_request:
-    branches: [master]
+    branches: [main, master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -32,3 +32,37 @@ jobs:
         run: |
           cd doc
           uv run make html
+# ---------------------------------------------
+# Q1.这个文档（.github/workflows/docs_test.yml）的作用：
+# A1:自动化测试和构建你的项目文档。
+#
+# 具体流程：
+# 1. 检出（checkout）你的代码仓库。
+# 2. 安装依赖工具（如 uv、Pandoc）。
+# 3. 安装项目及文档相关依赖。
+# 4. 进入 doc 目录，自动构建（make html）Sphinx 文档。
+#
+# 这样可以确保文档始终能被正确生成，及时发现文档构建中的错误，提升项目的持续集成和文档质量。
+# Q2.
+#A2:doc/Makefile 文件中并没有直接写出 html 目标，而是通过通配符 %: Makefile，把所有未知目标（如 make html）都路由给 Sphinx 的 sphinx-build 工具。
+#具体来说：
+#
+#当你运行 make html 时，其实会执行： sphinx-build -M html . _build 这会让 Sphinx 在 doc 目录下生成 HTML 格式的文档，输出到 _build 目录。
+#作用总结：
+#
+#只要 Sphinx 支持的目标（如 html、latexpdf、clean 等），都可以直接 make 目标名，自动调用 sphinx-build 完成文档构建或清理等操作。
+#这样写 Makefile，维护简单，支持 Sphinx 的所有构建目标。
+#如需更详细解释 sphinx-build -M html 的作用，也可以继续问我！
+# ---------------------------------------------
+# Q3.sphinx-build -M html 这个文档在哪里，作用是什么？
+# 答：sphinx-build 是 Sphinx 工具自带的命令行程序，不是项目里的某个文档。-M html 表示用“make mode”生成 HTML 格式的文档。
+# 作用是把 doc/ 目录下的文档源文件编译成 HTML 网页，输出到 _build/html 目录。
+#
+# Q4.文档源文件在哪里？
+# 答：文档源文件位于 doc/ 目录下，通常包括1.doc/conf.py : Sphinx 的主配置文件
+#;2.doc/.rst 或 doc/.md：文档的源文件（reStructuredText 或 Markdown 格式）
+#3.doc/Makefile：构建入口。
+# Q5:这些文件定义了文档的结构、内容和生成方式。
+#A5:构建好的html项目在哪里
+#构建好的 HTML 项目在 doc/_build/html 目录下。
+#你可以在本地用浏览器打开 doc/_build/html/index.html 来查看生成的文档页面。

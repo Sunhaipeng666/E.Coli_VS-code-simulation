@@ -8,9 +8,9 @@ permissions:
 
 on:
   push:
-    branches: [master]
+    branches: [main, master]
   pull_request:
-    branches: [master]
+    branches: [main, master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -67,3 +67,23 @@ jobs:
     - name: Ruff
       run: |
         uv run ruff check doc ecoli wholecell runscripts validation reconstruction
+
+# ----------------------------------------
+# 以下为AI助手与用户的对话记录（2025-09-26）：
+#
+# Q: 结合代码解释这个文档的作用
+# A: 该文档是 GitHub Actions 的工作流配置文件（.github/workflows/pytest.yml），用于自动化持续集成（CI），主要实现对项目的质量保证（QA）流程。结合代码解释如下：
+#   1. 触发条件：当代码推送（push）到 master 分支，或有针对 master 分支的拉取请求（pull request）时自动触发。
+#   2. 并发控制：保证同一分支或 PR 的 CI 任务不会重复运行，若有新任务会自动取消旧的。
+#   3. 定义了三个 Job：
+#      - Pytest：依次检出代码、安装依赖、运行模型初始化脚本、提取参数、运行pytest测试。
+#      - Mypy：依次检出代码、安装依赖、运行mypy类型检查。
+#      - Lint：依次检出代码、安装依赖、运行ruff代码风格检查。
+#   作用总结：保证每次代码变更都自动进行依赖安装、模型初始化、单元测试、类型检查和代码风格检查，确保主分支代码的正确性和规范性。
+#
+# Q: 它设计的脚本文件在哪里
+# A: 主要涉及的脚本文件位于 runscripts/ 目录下，包括 runscripts/parca.py、data/marA_binding/get_TU_ID.py 等，这些脚本负责模型的构建、参数提取和分析，是自动化流程的核心执行脚本。
+#
+# Q: 这些文件是在本地还是官方提供
+# A: 这些脚本文件是本地项目自带的文件，不是官方（如 Python、GitHub Actions 或第三方库）提供的。它们由本项目开发者编写，专门用于本项目的自动化流程和数据处理。
+#

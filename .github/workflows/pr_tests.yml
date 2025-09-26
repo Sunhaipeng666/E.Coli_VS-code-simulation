@@ -16,9 +16,9 @@ concurrency:
 
 on:
   push:
-    branches: [master]
+    branches: [main, master]
   pull_request:
-    branches: [master]
+    branches: [main, master]
 
 jobs:
   Reproducibility:
@@ -82,3 +82,63 @@ jobs:
       if: ${{ failure() }}
       run: |
         nextflow log -q | tail -n 1 | awk '{print $1}' | xargs -I {} nextflow log {} -f name,stderr -F "status == 'FAILED'"
+
+  # =====================
+  # Q&A (对话问答记录)
+  # =====================
+  # Q: 解释一下这个文件的作用
+  # A: `.github/workflows/pr_tests.yml` 是一个 GitHub Actions 工作流配置文件。它的主要作用是自动化地在每次有 Pull Request（PR）提交到仓库时，运行预设的测试流程。这样可以确保每次代码变更都经过自动化测试，保证代码质量和稳定性。
+  #
+  # 具体功能包括：
+  # - 触发时机：通常在有 PR 创建、更新或同步到主分支时自动运行。
+  # - 自动化测试：会自动拉取代码，安装依赖，运行测试脚本（如 pytest、unittest 等）。
+  # - 反馈结果：测试通过或失败的结果会直接反馈到 PR 页面，方便开发者及时修复问题。
+  # - 持续集成（CI）：是持续集成流程的一部分，帮助团队协作开发时保持主分支的健康。
+  #
+  # Q: 结合代码解释
+  # A: 结合代码，`.github/workflows/pr_tests.yml` 文件的作用和主要内容如下：
+  #
+  # 1. 工作流名称和触发条件
+  # - name: Workflow，定义了工作流的名字。
+  # - on: push 和 pull_request，表示每当有代码推送到 master 分支或有 PR 针对 master 分支时自动触发。
+  #
+  # 2. 权限与并发
+  # - permissions: 只读内容和写 PR 权限。
+  # - concurrency: 保证同一个 PR 或分支只运行一个工作流，新的会取消旧的。
+  #
+  # 3. jobs（任务）部分
+  # 包含两个主要任务（job）：
+  #
+  # ### 1. Reproducibility（可复现性测试）
+  # - 运行环境：macos-latest
+  # - 步骤：
+  #   - 检出代码（actions/checkout@v2）
+  #   - 安装 uv 包管理工具
+  #   - 安装依赖（USE_CYTHON=1 uv sync --frozen）
+  #   - 运行两次 parca.py，分别输出到 out/parca_1 和 out/parca_2
+  #   - 用 compare_pickles.py 比较两次结果，检查是否一致
+  #   - 运行两次 ecoli_master_sim.py 仿真，分别用不同的输出目录和数据
+  #   - 比较两次仿真输出（diff_simouts.py），确保仿真结果可复现
+  #
+  # ### 2. Two-gens（两代仿真测试）
+  # - 运行环境：macos-latest
+  # - 步骤：
+  #   - 检出代码
+  #   - 安装 uv
+  #   - 安装依赖
+  #   - 安装 nextflow edge 版本（用于流程管理）
+  #   - 运行 workflow.py，配置为两代仿真（configs/two_generations.json）
+  #   - 如果 nextflow 任务失败，输出失败任务的 stderr 便于调试
+  #
+  # 总结：
+  # 这个文件的作用是自动化地在 PR 或 push 时，分别测试模型的可复现性和两代仿真流程，确保代码变更不会破坏核心功能，并在失败时提供详细日志，方便开发者定位问题。
+  #
+  # Q: 这个也是在云端运行么？还有为什么要使用macos环境
+  # A: 是的，这个 GitHub Actions 工作流是在云端运行的。每次有 PR 或 push 事件触发时，GitHub 会在其云服务器上自动拉取你的代码并执行这些测试流程。
+  #
+  # 关于为什么使用 macos-latest 环境：
+  # - macos-latest 是 GitHub 提供的云端 macOS 虚拟机环境，适合需要在 macOS 下测试的软件（比如有些依赖或工具只在 macOS 下可用，或需要验证跨平台兼容性）。
+  # - 你的项目可能需要验证在 macOS 下的可用性，或者某些依赖（如 Nextflow、uv、Cython）在 macOS 下的表现与 Linux/Windows 不同。
+  # - 也有可能是历史原因或团队开发成员主要使用 macOS。
+  #
+  # 如果没有特殊需求，也可以将 runs-on 改为 ubuntu-latest（Linux），这样可以加快运行速度并节省 GitHub Actions 的运行配额。

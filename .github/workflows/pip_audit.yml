@@ -8,7 +8,7 @@ on:
   schedule:
     - cron: '00 00 * * *'
   push:
-    branches: [master]
+    branches: [mian, master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -57,3 +57,34 @@ jobs:
           add-paths: uv.lock
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ---------------------------------------------
+  # 以下为本次对话内容逐字备份：
+  #
+  # 用户：帮我解释这个文档的代码作用
+  # Copilot：这个文档是 GitHub Actions 的工作流配置文件，名为 `pip-audit`，主要用于自动化检查 Python 项目的依赖安全漏洞。其主要作用如下：
+  # 1. 触发条件：每天定时（UTC 0点）自动运行（`schedule`）。每次推送到 `master` 分支时运行（`push`）。
+  # 2. 权限设置：允许对仓库内容和 Pull Request 进行写操作。
+  # 3. 并发控制：保证同一分支或 PR 只运行一个该工作流实例，新的会取消旧的。
+  # 4. 作业流程（`jobs.audit`）：在 `ubuntu-latest` 环境下运行。步骤如下：
+  #    1. 检出代码：拉取仓库代码到 runner。
+  #    2. 安装 uv：用 `astral-sh/setup-uv` 安装 `uv` 工具（用于依赖管理）。
+  #    3. 导出依赖并审计：用 `uv export` 导出所有依赖到 `requirements.txt`。用 `uvx pip-audit` 检查依赖安全漏洞，结果保存为 `pip_audit_results.txt`，即使有漏洞也不会导致流程失败。
+  #    4. 处理审计结果：用 `uv run` 执行 `runscripts/debug/process_vulnerabilities.py` 脚本，对审计结果进行进一步处理。
+  # 总结：这个工作流每天和每次主分支推送时，自动检查依赖安全漏洞，并处理结果，帮助项目持续保持依赖安全。
+  #
+  # 用户：这里的依赖安全漏斗指什么？举个例子
+  # Copilot：依赖安全漏洞指的是你项目中用到的第三方库（依赖）存在被公开披露的安全问题，比如可以被攻击者利用来获取敏感信息、执行恶意代码等。
+  # 举个例子：假设你的项目依赖了 `requests` 这个库，而某个版本的 `requests` 存在远程代码执行漏洞（比如 CVE-2023-32681）。如果你安装了受影响的版本，攻击者可能通过特定方式让你的程序执行恶意代码。pip-audit 工具会检测 `requirements.txt` 里的所有依赖，查找它们是否有已知的安全漏洞，并报告出来。这样你就可以及时升级或替换有问题的依赖，避免安全风险。
+  #
+  # 用户：pip_audit_results.txt这个文件会被保存在哪里
+  # Copilot：`pip_audit_results.txt` 文件会被保存在 GitHub Actions 运行环境的工作目录（即代码仓库的根目录）下。它不会自动上传到你的 GitHub 仓库，只在每次工作流运行时临时生成和使用。工作流结束后，这个文件会随着 runner 环境销毁而消失，不会长期保留在仓库中。
+  #
+  # 用户：那我怎样查看他
+  # Copilot：要查看 `pip_audit_results.txt`，你可以在 GitHub Actions 的运行记录（Actions 页面）中查看相关步骤的输出。你可以在工作流的“Process audit information”步骤中，添加一行命令把文件内容输出到日志，例如：
+  # - name: Show audit results
+  #   run: cat pip_audit_results.txt
+  # 这样每次工作流运行时，审计结果会显示在 Actions 日志里，你可以直接在网页上查看。
+  #
+  #
+

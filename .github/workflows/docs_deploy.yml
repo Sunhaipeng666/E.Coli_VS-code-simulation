@@ -5,7 +5,7 @@ permissions:
 
 on:
   push:
-    branches: [master]
+    branches: [main, master]
 
 jobs:
   deploy-docs:
@@ -30,8 +30,8 @@ jobs:
           cd doc/_build/html
           touch .nojekyll
           git config --global init.defaultBranch master
-          git config --global user.name "CovertLab [bot]"
-          git config --global user.email "CovertLab@users.noreply.github.com"
+          git config --global user.name "sunhaipeng666"
+          git config --global user.email "sunhaipeng1025@gmail.com"
           git init
           git add -A
           git commit -m "Sphinx build from commit $GITHUB_SHA by GitHub Action"
