@@ -9,9 +9,9 @@ permissions:
 on:
   push:
     branches:
-      - main,master
+      - main
   pull_request:
-    branches: [main,master]
+    branches: [main]
   schedule:
     - cron: "0 0 * * *" # Runs daily at midnight UTC
 
