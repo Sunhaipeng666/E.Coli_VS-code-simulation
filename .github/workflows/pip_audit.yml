@@ -8,7 +8,7 @@ on:
   schedule:
     - cron: '00 00 * * *'
   push:
-    branches: [mian, master]
+    branches: [mian]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
